@@ -1,0 +1,58 @@
+[
+    {
+        "model": "auth.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$600000$mock$pbkdf2_sha256$600000$...",
+            "is_superuser": true,
+            "username": "admin",
+            "first_name": "Jedi",
+            "last_name": "Master",
+            "email": "admin@veriforce.ai",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2026-02-21T21:00:00Z"
+        }
+    },
+    {
+        "model": "videos.video",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "title": "Suspected Campaign Deepfake",
+            "file": "videos/modi_fake.mp4",
+            "status": "COMPLETED",
+            "uploaded_at": "2026-02-21T21:30:00Z",
+            "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+    },
+    {
+        "model": "analysis.ensembleresult",
+        "pk": 1,
+        "fields": {
+            "video": 1,
+            "final_score": 0.942,
+            "verdict": "FAKE",
+            "confidence": 0.98,
+            "weights_used": {
+                "visual": 0.35,
+                "audio": 0.30,
+                "biometric": 0.20,
+                "metadata": 0.15
+            },
+            "timeline_data": [
+                {
+                    "start": 0,
+                    "end": 15,
+                    "verdict": "real"
+                },
+                {
+                    "start": 16,
+                    "end": 32,
+                    "verdict": "fake",
+                    "reason": "face_swap"
+                }
+            ]
+        }
+    }
+]

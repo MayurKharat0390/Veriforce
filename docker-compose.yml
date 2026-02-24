@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=veriforce
+      - POSTGRES_USER=veriforce
+      - POSTGRES_PASSWORD=veriforce
+
+  redis:
+    image: redis:7-alpine
+
+  backend:
+    build: ./backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://veriforce:veriforce@db:5432/veriforce
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=dev-secret-key-123
+      - DEBUG=True
+
+  celery:
+    build: ./backend
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - redis
+      - backend
+    environment:
+      - DATABASE_URL=postgresql://veriforce:veriforce@db:5432/veriforce
+      - REDIS_URL=redis://redis:6379/0
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

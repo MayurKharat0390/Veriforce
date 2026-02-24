@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-force-blue: #00ccff;
+  --color-force-red: #ff0033;
+  --color-force-green: #00ffcc;
+  --color-force-gold: #ffcc00;
+  --color-force-black: #050505;
+  --color-force-gray: #1a1a1a;
+
+  --color-jedi-primary: #00b2ff;
+  --color-jedi-secondary: #0055ff;
+  --color-jedi-accent: #ffffff;
+
+  --color-sith-primary: #ff0000;
+  --color-sith-secondary: #8b0000;
+  --color-sith-accent: #222222;
+
+  --font-sans: "Inter", "system-ui", "sans-serif";
+  --font-display: "Outfit", "sans-serif";
+  --font-mono: "JetBrains Mono", "monospace";
+
+  --animate-pulse-glow: pulseGlow 2s infinite;
+  --animate-float: float 3s ease-in-out infinite;
+
+  --shadow-blue-glow: 0 0 15px rgba(0, 204, 255, 0.5);
+  --shadow-red-glow: 0 0 15px rgba(255, 0, 51, 0.8);
+  --shadow-gold-glow: 0 0 15px rgba(255, 204, 0, 0.8);
+
+  @keyframes pulseGlow {
+
+    0%,
+    100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+
+    50% {
+      opacity: 0.7;
+      filter: brightness(1.5);
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-force-black text-white font-sans antialiased overflow-x-hidden;
+    background-image:
+      radial-gradient(circle at 50% 50%, rgba(0, 204, 255, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 10% 20%, rgba(255, 0, 51, 0.03) 0%, transparent 30%);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display tracking-tight font-bold;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-force-blue text-black font-bold rounded-full transition-all hover:scale-105 active:scale-95 shadow-blue-glow;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-transparent border border-white/20 text-white font-bold rounded-full transition-all hover:bg-white/10 active:scale-95;
+  }
+
+  .force-glow-blue {
+    text-shadow: 0 0 10px rgba(0, 204, 255, 0.8), 0 0 20px rgba(0, 204, 255, 0.4);
+  }
+
+  .force-glow-red {
+    text-shadow: 0 0 10px rgba(255, 0, 51, 0.8), 0 0 20px rgba(255, 0, 51, 0.4);
+  }
+}
+
+/* Star field background */
+.stars-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: twinkler 5s infinite;
+}
+
+@keyframes twinkler {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
