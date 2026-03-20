@@ -23,7 +23,8 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             try {
                 const refreshToken = localStorage.getItem('refresh_token');
-                const response = await axios.post('http://localhost:8000/api/auth/refresh/', {
+                const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/';
+                const response = await axios.post(`${baseURL}auth/refresh/`, {
                     refresh: refreshToken,
                 });
                 localStorage.setItem('token', response.data.access);
