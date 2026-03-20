@@ -60,8 +60,12 @@ class ForceEnsemble:
         # 5. Dynamic Confidence Calibration
         # We penalize confidence if there is high variance in input signals
         signal_variance = np.var(list(x.values()))
-        base_confidence = 1.0 - (signal_variance * 1.2) # High variance lowers confidence
+        confidence = max(0.01, min(1.0, 1.0 - (signal_variance * 1.2))) # High variance lowers confidence
         
+        # Compute binary entropy as a proxy for uncertainty
+        p = max(0.0001, min(0.9999, final_prob))
+        entropy = -(p * np.log2(p) + (1 - p) * np.log2(1 - p))
+
         # Mapping to verdict
         if final_prob > 0.62:
             verdict = "FAKE"
@@ -88,5 +92,5 @@ class ForceEnsemble:
                 "probability": float(final_prob)
             },
             "timeline_data": [{"time": 0, "score": final_score}],
-            "weights_used": self.params # These are parameters, not weights
+            "weights_used": self.params
         }
