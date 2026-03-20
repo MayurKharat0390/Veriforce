@@ -1,17 +1,60 @@
-# 🛡️ VeriForce: The Jedi Mind Trick Detector
+<div align="center">
+  <img src="https://via.placeholder.com/800x200/0f172a/38bdf8?text=VeriForce:+The+Jedi+Mind+Trick+Detector" alt="VeriForce Banner">
 
-**Winner's Choice for Bluebit Hackathon 4.0**
+  # 🛡️ VeriForce
+  
+  **Winner's Choice for Bluebit Hackathon 4.0**
+  
+  *Protecting democracy and human connection in the age of synthetic media through multi-modal deepfake detection.*
 
-VeriForce is a production-ready multi-modal deepfake detection platform designed to protect democracy and human connection in the age of synthetic media.
+  <br />
+
+  ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+  ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)
+  ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+  ![Celery](https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white)
+
+</div>
+
+<br />
+
+## 📸 Platform Glimpse
+> **Note to Judges**: Since VeriForce runs large AI models natively (`PyTorch`, `Transformers`), the platform is best experienced locally. Below are snapshots of the interface.
+
+| **Jedi Council Dashboard** | **Biometric Pulse Detection** |
+| :---: | :---: |
+| <img src="https://via.placeholder.com/400x250/1e293b/94a3b8?text=Dashboard+Screenshot" alt="Dashboard"> | <img src="https://via.placeholder.com/400x250/1e293b/94a3b8?text=Pulse+Detection+Screenshot" alt="Detector"> |
+
+---
+
+## 🏗️ The MLE Architecture: The Four Forces
+
+VeriForce utilizes a highly advanced ensemble engine that combines multiple layers of detection to catch deepfakes that single-model systems miss:
+
+1. 👁️ **Visual Force (35%)**: Artifact and face-swap detection using latent anomalies.
+2. 🎙️ **Audio Force (30%)**: Voice cloning and synthetic breath pattern mapping.
+3. 💾 **Metadata Force (15%)**: File origin tracking and compression artifact history.
+4. ❤️ **Biometric Force (20%)**: Remote Photoplethysmography (rPPG) measuring synthetic blood flow.
+
+---
+
+## ✨ Unique Features
+- ⚖️ **Jedi Council Views**: Highly specialized analytics dashboards built specifically for Journalists, Lawyers, Citizens, and Platforms. 
+- 🏛️ **Election Guardian**: Real-time political deepfake monitoring tailored for the Indian electorate.
+- 🔗 **Blockchain Guardian**: Tamper-proof, immutable content authentication deployed via Polygon.
+- 🎮 **Gamified Training**: Educating the public on how to spot the 'Force' (fake media).
+
+---
 
 ## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
 - Python 3.11+
 - Node.js 20+
-- Redis (optional for local, required for async processing)
+- Redis (Required for async background processing of large videos)
 
-### 1. Backend Setup (Django)
+### 1. Backend Setup (Django API + ML)
 ```bash
 cd backend
 pip install -r requirements.txt
@@ -20,37 +63,29 @@ python manage.py loaddata fixtures/sample_data.json
 python manage.py runserver
 ```
 
-### 2. Frontend Setup (React)
+### 2. Celery Workers (Video Processing)
+*In a separate terminal, start the worker to handle the intensive ML jobs.*
+```bash
+cd backend
+celery -A config worker --loglevel=info
+```
+
+### 3. Frontend Setup (React App)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### 3. Celery (Environment with Redis)
-```bash
-cd backend
-celery -A config worker --loglevel=info
-```
+---
 
-## 🏗️ Architecture: The Four Forces
-
-VeriForce utilizes an ensemble engine that combines:
-1. **Visual Force (35%)**: Face-swap and lighting analysis.
-2. **Audio Force (30%)**: Voice cloning and breath pattern detection.
-3. **Metadata Force (15%)**: File origin and compression artifact tracing.
-4. **Biometric Force (20%)**: Remote Pulse (rPPG) and blood flow mapping.
-
-## ✨ Unique Features
-- **Jedi Council Views**: Specialized dashboards for Journalists, Lawyers, Citizens, and Platforms.
-- **Election Guardian**: Real-time deepfake monitoring for the Indian electorate.
-- **Blockchain Guardian**: Tamper-proof content authentication via Polygon.
-- **Gamified Training**: Educating the public on how to spot the 'Force' (the truth).
-
-## 🛠️ Tech Stack
-- **Backend**: Django, DRF, Celery, Redis, PostgreSQL.
-- **Frontend**: React 18, TypeScript, TailwindCSS, Framer Motion, Recharts.
-- **Infrastructure**: Docker, Docker Compose, WhiteNoise.
+## 🛠️ Full Tech Stack
+- **Frontend**: React 18, TypeScript, Vite, TailwindCSS, Framer Motion, Recharts.
+- **Backend**: Django, Django REST Framework, PostgreSQL.
+- **Machine Learning**: PyTorch, Transformers, ONNX Runtime, OpenCV, Librosa.
+- **Infrastructure & Async**: Celery, Redis, Docker Compose.
 
 ---
-*May the Force be with our code.*
+<div align="center">
+  <i>May the Force be with our code.</i>
+</div>
