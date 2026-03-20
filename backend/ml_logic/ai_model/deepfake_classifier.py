@@ -51,86 +51,116 @@ class AIForce:
             if total_frames == 0:
                 return self._fallback("Empty video file")
 
-            # Sample up to 10 frames for AI inference (CPU speed constraint)
-            sample_rate = max(1, total_frames // 10)
-            frame_count = 0
-            predictions = []  # list of (fake_prob, real_prob)
+            # --- Segmented Sampling ---
+            # Divide video into 10 segments and pick 1 best frame from each
+            # This ensures we don't just look at the beginning/end
+            segment_size = max(1, total_frames // 10)
+            predictions = []
 
-            while cap.isOpened() and frame_count < total_frames:
-                ret, frame = cap.read()
-                if not ret:
-                    break
-
-                if frame_count % sample_rate == 0 and len(predictions) < 10:
-                    # Try to find a face first (best classification quality)
+            for i in range(10):
+                start_frame = i * segment_size
+                cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+                
+                # Try up to 5 consecutive frames in this segment to find a face
+                for _ in range(5):
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    
                     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                    faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
+                    gray = cv2.equalizeHist(gray)
+                    faces = self.face_cascade.detectMultiScale(gray, 1.05, 3, minSize=(30, 30))
 
                     if len(faces) > 0:
                         x, y, w, h = faces[0]
-                        # Add padding around face
-                        pad = int(w * 0.2)
+                        pad = int(w * 0.2) # Larger padding for ViT
                         x1 = max(0, x - pad)
                         y1 = max(0, y - pad)
                         x2 = min(frame.shape[1], x + w + pad)
                         y2 = min(frame.shape[0], y + h + pad)
                         crop = frame[y1:y2, x1:x2]
-                    else:
-                        # No face — use full frame (works for AI-generated objects too)
-                        crop = frame
+                        
+                        rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
+                        pil_img = Image.fromarray(rgb)
 
-                    # Convert BGR → RGB PIL Image for HuggingFace
-                    rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
-                    pil_img = Image.fromarray(rgb)
+                        # --- Test Time Augmentation (TTA) ---
+                        # Analyze original + horizontal flip for robustness
+                        flipped_pil = pil_img.transpose(Image.FLIP_LEFT_RIGHT)
+                        
+                        results = pipe([pil_img, flipped_pil])
+                        
+                        # Average the probabilities across TTA steps
+                        avg_fake = 0.0
+                        avg_real = 0.0
+                        for res in results:
+                            for item in res:
+                                lbl = item['label'].lower()
+                                if 'fake' in lbl: avg_fake += item['score']
+                                elif 'real' in lbl: avg_real += item['score']
+                        
+                        avg_fake /= 2.0
+                        avg_real /= 2.0
 
-                    result = pipe(pil_img)
-
-                    # Parse result labels (model output: "Fake" or "Real")
-                    fake_score = 0.0
-                    real_score = 0.0
-                    for item in result:
-                        lbl = item['label'].lower()
-                        if 'fake' in lbl:
-                            fake_score = float(item['score'])
-                        elif 'real' in lbl:
-                            real_score = float(item['score'])
-
-                    predictions.append({
-                        "frame": frame_count,
-                        "fake_prob": fake_score,
-                        "real_prob": real_score,
-                        "had_face": len(faces) > 0
-                    })
-
-                frame_count += 1
-
+                        predictions.append({
+                            "frame": start_frame,
+                            "fake_prob": avg_fake,
+                            "real_prob": avg_real,
+                            "had_face": True
+                        })
+                        break # Found a face in this segment, move to next segment
+            
             cap.release()
 
             if not predictions:
-                return self._fallback("No frames could be classified")
+                return self._fallback("No faces could be classified in the sampled segments.")
 
-            # Aggregate: weighted average (weight higher-confidence predictions more)
-            fake_probs = [p['fake_prob'] for p in predictions]
+            # --- Advanced Scoring Logic ---
+            eval_set = predictions
+            fake_probs = [p['fake_prob'] for p in eval_set]
+            
             avg_fake_prob = float(np.mean(fake_probs))
             max_fake_prob = float(np.max(fake_probs))
-            frames_flagged = sum(1 for p in fake_probs if p > 0.6)
+            std_fake_prob = float(np.std(fake_probs)) # High variance = suspicious
+            
+            # Instability: Massive swings in confidence across segments
+            is_unstable = bool(std_fake_prob > 0.35)
+            
+            # Count high-certainty fake frames
+            high_confidence_fakes = sum(1 for p in fake_probs if p > 0.85)
 
-            # Convert probability to 0-100 score
-            # If avg fake probability > 0.5, we lean FAKE
-            score = float(avg_fake_prob * 100)
+            # --- Robust Non-linear Logic (Boosted Sensitivity) ---
+            # Even a 30% prob from the neural model is highly suspicious in deepfake datasets.
+            if avg_fake_prob < 0.15:
+                base_score = avg_fake_prob * 33.3  # 0 to 5
+            elif avg_fake_prob < 0.4:
+                base_score = 5 + (avg_fake_prob - 0.15) * 180 # 5 to 50
+            else:
+                base_score = 50 + (avg_fake_prob - 0.4) * 83.3 # 50 to 100
+
+            # "Smoking Gun" Boost: If even ONE frame is 98% fake, it's highly suspicious
+            if max_fake_prob > 0.98:
+                base_score = max(base_score, 85.0)
+            
+            # Instability Boost: AI models often "trip" on specific frames
+            if is_unstable:
+                base_score = max(base_score, 70.0)
+
+            final_score = float(min(100.0, base_score))
 
             return {
-                "score": score,
-                "status": "Analyzed (AI Model)",
+                "score": final_score,
+                "status": "Analyzed (AI Model v2)",
                 "model": "dima806/deepfake_vs_real_image_detection",
                 "avg_fake_probability": avg_fake_prob,
                 "max_fake_probability": max_fake_prob,
-                "frames_analyzed": len(predictions),
-                "frames_flagged_as_fake": frames_flagged,
-                "per_frame_results": predictions[:3],  # Show first 3 only
+                "is_temporally_unstable": is_unstable,
+                "frames_analyzed": len(eval_set),
+                "high_confidence_hits": high_confidence_fakes,
                 "details": {
-                    "model_verdict": "FAKE" if avg_fake_prob > 0.5 else "REAL",
-                    "confidence": float(max(avg_fake_prob, 1 - avg_fake_prob))
+                    "model_verdict": "FAKE" if final_score > 50 else "REAL",
+                    "confidence": float(avg_fake_prob if final_score > 50 else (1 - avg_fake_prob)),
+                    "tta_enabled": True,
+                    "segmented_sampling": True
                 }
             }
 

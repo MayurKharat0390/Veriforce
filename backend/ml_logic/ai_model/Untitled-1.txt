@@ -1,0 +1,80 @@
+[Hugging Face](https://huggingface.co/)
+- [Models](https://huggingface.co/models) 
+- [Datasets](https://huggingface.co/datasets) 
+- [Spaces](https://huggingface.co/spaces) 
+-    Community     
+- [Docs](https://huggingface.co/docs) 
+- [Enterprise](https://huggingface.co/enterprise) 
+- [Pricing](https://huggingface.co/pricing)
+-        
+- 
+- [Log In](https://huggingface.co/login)
+- [Sign Up](https://huggingface.co/join)
+[Models](https://huggingface.co/models)
+[Datasets](https://huggingface.co/datasets)
+[Spaces](https://huggingface.co/spaces)
+[Docs](https://huggingface.co/docs)
+[Enterprise](https://huggingface.co/enterprise)
+[Pricing](https://huggingface.co/pricing)
+[Log In](https://huggingface.co/login)
+[Sign Up](https://huggingface.co/join)
+
+# https://huggingface.co/[dima806](https://huggingface.co/dima806) dima806 / [deepfake_vs_real_image_detection](https://huggingface.co/dima806/deepfake_vs_real_image_detection) like 45
+
+[dima806](https://huggingface.co/dima806)
+[deepfake_vs_real_image_detection](https://huggingface.co/dima806/deepfake_vs_real_image_detection)
+[Image Classification](https://huggingface.co/models?pipeline_tag=image-classification)
+[Transformers](https://huggingface.co/models?library=transformers)
+[PyTorch](https://huggingface.co/models?library=pytorch)
+[Safetensors](https://huggingface.co/models?library=safetensors)
+[vit](https://huggingface.co/models?other=vit)
+[Model card](https://huggingface.co/dima806/deepfake_vs_real_image_detection)
+[Files Files and versions    xet](https://huggingface.co/dima806/deepfake_vs_real_image_detection/tree/main)
+[Community 1](https://huggingface.co/dima806/deepfake_vs_real_image_detection/discussions)
+Checks whether an image is real or fake (AI-generated).
+Note to users who want to use this model in production
+Beware that this model is trained on a dataset collected about 3 years ago. Since then, there is a remarkable progress in generating deepfake images with common AI tools, resulting in a significant concept drift. To mitigate that, I urge you to retrain the model using the latest available labeled data. As a quick-fix approach, simple reducing the threshold (say from default 0.5 to 0.1 or even 0.01) of labelling image as a fake may suffice. However, you will do that at your own risk, and retraining the model is the better way of handling the concept drift.
+See [https://www.kaggle.com/code/dima806/deepfake-vs-real-faces-detection-vit](https://www.kaggle.com/code/dima806/deepfake-vs-real-faces-detection-vit) for more details.
+
+```
+Classification report: precision recall f1-score support Real 0.9921 0.9933 0.9927 38080 Fake 0.9933 0.9921 0.9927 38081 accuracy 0.9927 76161 macro avg 0.9927 0.9927 0.9927 76161 weighted avg 0.9927 0.9927 0.9927 76161
+```
+
+
+```
+Classification report: precision recall f1-score support Real 0.9921 0.9933 0.9927 38080 Fake 0.9933 0.9921 0.9927 38081 accuracy 0.9927 76161 macro avg 0.9927 0.9927 0.9927 76161 weighted avg 0.9927 0.9927 0.9927 76161
+```
+
+Files info
+[NEW](https://huggingface.co/docs/inference-providers)
+[Image Classification](https://huggingface.co/tasks/image-classification)
+
+## https://huggingface.co/docs/hub/model-cards#specifying-a-base-model Model tree for dima806/deepfake_vs_real_image_detection
+Base model
+[google/vit-base-patch16-224-in21k](https://huggingface.co/google/vit-base-patch16-224-in21k)
+[2490](https://huggingface.co/models?other=base_model:finetune:google/vit-base-patch16-224-in21k)
+[1 model](https://huggingface.co/models?other=base_model:adapter:dima806/deepfake_vs_real_image_detection)
+[12 models](https://huggingface.co/models?other=base_model:finetune:dima806/deepfake_vs_real_image_detection)
+
+## Spaces using dima806/deepfake_vs_real_image_detection 46
+[📊 ShahanMalik/smart_guard_ai](https://huggingface.co/spaces/ShahanMalik/smart_guard_ai)
+[🛡️ alihaidar-ai/aegis-ai-multimedia-integrity-full](https://huggingface.co/spaces/alihaidar-ai/aegis-ai-multimedia-integrity-full)
+[🔥 Jdp-08/deepseek](https://huggingface.co/spaces/Jdp-08/deepseek)
+[📚 bzshzl/dima806-deepfake_vs_real_image_detection](https://huggingface.co/spaces/bzshzl/dima806-deepfake_vs_real_image_detection)
+[🏃 kautilya286/DeepfakeDetection](https://huggingface.co/spaces/kautilya286/DeepfakeDetection)
+[📉 criticalDanger/Experiment](https://huggingface.co/spaces/criticalDanger/Experiment)
+[📚 tahsin000/dima806-deepfake_vs_real_image_detection](https://huggingface.co/spaces/tahsin000/dima806-deepfake_vs_real_image_detection)
+[🐠 jamiko/real-or-fake](https://huggingface.co/spaces/jamiko/real-or-fake)
+[💬 0xsaurrabh/dima806-deepfake_vs_real_image_detection](https://huggingface.co/spaces/0xsaurrabh/dima806-deepfake_vs_real_image_detection)
+[🚀 Disha9854/xyz](https://huggingface.co/spaces/Disha9854/xyz)
+[👀 Disha9854/testing-audio-deepfake-interface](https://huggingface.co/spaces/Disha9854/testing-audio-deepfake-interface)
+[👀 dhairyashah/testing-audio-deepfake-interface](https://huggingface.co/spaces/dhairyashah/testing-audio-deepfake-interface)
+[TOS](https://huggingface.co/terms-of-service)
+[Privacy](https://huggingface.co/privacy)
+[About](https://huggingface.co/huggingface)
+[Careers](https://apply.workable.com/huggingface/)
+[Models](https://huggingface.co/models)
+[Datasets](https://huggingface.co/datasets)
+[Spaces](https://huggingface.co/spaces)
+[Pricing](https://huggingface.co/pricing)
+[Docs](https://huggingface.co/docs)

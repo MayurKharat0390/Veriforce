@@ -24,10 +24,12 @@ class BiometricForce:
             
             if frame_count % 2 == 0:
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
+                gray = cv2.equalizeHist(gray) # Boost contrast
+                faces = self.face_cascade.detectMultiScale(gray, 1.05, 3, minSize=(60, 60))
                 
                 if len(faces) > 0:
-                    x, y, w, h = faces[0]
+                    # Take biggest face
+                    x, y, w, h = max(faces, key=lambda f: f[2]*f[3])
                     roi = frame[y+h//10 : y+h//3, x+w//4 : x+3*w//4]
                     if roi.size > 0:
                         avg_green = float(np.mean(roi[:, :, 1]))
@@ -73,20 +75,33 @@ class BiometricForce:
             snr = float(peak_amp / mean_amp) if mean_amp > 0 else 0.0
 
         # Scoring
-        score = 80.0
-        if snr > 5.0 and 45 <= bpm <= 160:
-            score = 10.0
-        elif snr > 2.5:
-            score = 35.0
+        # Default to neutral if results are unclear
+        score = 30.0 
         
+        if snr > 5.0 and 45 <= bpm <= 160:
+            # Strong pulse found -> Likely REAL
+            score = 10.0
+        elif snr > 3.0:
+            # Moderate pulse found -> Lean REAL
+            score = 25.0
+        elif snr < 1.0 and len(green_signals) > 100:
+            # Clear data but ZERO signal -> Suspicious FAKE
+            score = 75.0
+        
+        # Return sampling for UI visualization
+        # We take at most 100 points to keep the payload small
+        step = max(1, len(green_signals) // 100)
+        ui_signals = [float(s) for s in green_signals[::step]]
+
         return {
             "score": float(score),
-            "status": "Analyzed",
+            "status": "Analyzed" if snr > 2.0 else "Weak Signal",
             "pulse_detected": bool(snr > 2.5),
             "heart_rate": float(bpm) if snr > 2.5 else None,
             "details": {
                 "snr": snr,
                 "peak_frequency": peak_freq,
-                "data_points": len(green_signals)
+                "data_points": len(green_signals),
+                "ui_signals": ui_signals
             }
         }

@@ -56,19 +56,19 @@ class MetadataForce:
             for sig in REAL_CAMERA_TAGS:
                 if sig in scan_data:
                     camera_found = sig.decode('utf-8', errors='ignore')
-                    score -= 20.0
+                    score -= 35.0  # Stronger evidence for REAL
                     findings.append(f"Real camera tag found: '{camera_found}'")
                     break
 
             # --- Strategy 2: Check for generic 'encoder' box without device info ---
-            # Real videos from cameras always have 'make'/'model' tags
+            # Messaging apps (WhatsApp/Telegram) STRIP these, so we shouldn't punish too hard
             has_make = any(b'make' in scan_data.lower() or b'Make' in scan_data 
                           for _ in [1])
             has_model = b'model' in scan_data or b'Model' in scan_data
 
             if not camera_found and not has_make and not has_model:
-                score += 20.0
-                findings.append("No camera make/model tag found (typical in synthetic media)")
+                score += 10.0  # Lowered from 20
+                findings.append("No camera make/model tag found (stripped or synthetic)")
 
             # --- Strategy 3: File size / bitrate plausibility ---
             # AI video generators often produce unnaturally clean low-bitrate files

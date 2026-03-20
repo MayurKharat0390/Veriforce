@@ -46,7 +46,8 @@ export const videoApi = {
     }),
     process: (id: number) => api.post(`videos/${id}/process/`),
     status: (id: number) => api.get(`videos/${id}/status/`),
-    results: (id: number) => api.get(`analysis/${id}/`)
+    results: (id: number) => api.get(`analysis/${id}/`),
+    exportDossier: (id: number) => api.get(`analysis/${id}/export/`, { responseType: 'blob' })
 };
 
 export default api;

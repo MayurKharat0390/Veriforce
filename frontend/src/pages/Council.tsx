@@ -1,23 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Scale, Cpu, UserCheck, Share2, Download, Code, ExternalLink, Shield, AlertCircle } from 'lucide-react';
+import { FileText, Scale, Cpu, UserCheck, Share2, Download, Code, ExternalLink, Shield, AlertCircle, Loader2 } from 'lucide-react';
+import api, { videoApi } from '../services/api';
+import toast from 'react-hot-toast';
 
-const JournalistView = () => (
+const JournalistView = ({ data, onDownload }: any) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-        <div className="glass-panel p-12 text-center border-force-red/20 bg-force-red/[0.02]">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-force-red/10 text-force-red text-xs font-bold mb-6">
-                <span>VERDICT: FAKE</span>
+        <div className={`glass-panel p-12 text-center border-white/10 ${data.ensemble_result.verdict === 'FAKE' ? 'bg-force-red/[0.05] border-force-red/20' : 'bg-force-green/[0.05] border-force-green/20'}`}>
+            <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-bold mb-6 ${data.ensemble_result.verdict === 'FAKE' ? 'bg-force-red/10 text-force-red' : 'bg-force-green/10 text-force-green'}`}>
+                <span>VERDICT: {data.ensemble_result.verdict}</span>
             </div>
-            <h2 className="text-4xl font-display font-black mb-4 uppercase">MANIPULATION DETECTED</h2>
+            <h2 className="text-4xl font-display font-black mb-4 uppercase">
+                {data.ensemble_result.verdict === 'FAKE' ? 'MANIPULATION DETECTED' : 'CLEAR CONTENT'}
+            </h2>
             <p className="text-white/60 max-w-xl mx-auto mb-8">
-                Our system has high confidence that this video has been synthetically altered. Most newsrooms are advised to avoid broadcasting without further verification.
+                {data.ensemble_result.verdict === 'FAKE' 
+                    ? "Our system has high confidence that this video has been synthetically altered. Most newsrooms are advised to avoid broadcasting without further verification."
+                    : "The four forensic forces indicate no significant signs of synthetic manipulation. Content is likely authentic."}
             </p>
             <div className="flex justify-center space-x-4">
                 <button className="btn-primary py-2 px-6 text-sm flex items-center space-x-2">
                     <Share2 size={16} />
                     <span>Share Alert</span>
                 </button>
-                <button className="btn-secondary py-2 px-6 text-sm flex items-center space-x-2">
+                <button onClick={onDownload} className="btn-secondary py-2 px-6 text-sm flex items-center space-x-2">
                     <Download size={16} />
                     <span>Press Kit</span>
                 </button>
@@ -28,44 +34,46 @@ const JournalistView = () => (
             <div className="glass-panel p-8">
                 <h3 className="font-bold mb-4 flex items-center space-x-2">
                     <FileText className="text-force-blue" />
-                    <span>Bullet Summary</span>
+                    <span>Evidence Summary</span>
                 </h3>
                 <ul className="space-y-4 text-sm text-white/50">
-                    <li>• Face mesh inconsistency detected at 04:12 mark</li>
-                    <li>• Audio breath patterns don't match lip movements</li>
-                    <li>• Background noise too consistent with AI generation</li>
+                    <li>• AI Probability: {(data.ensemble_result.final_score).toFixed(1)}%</li>
+                    <li>• Visual Force: {data.visual_analysis.score}% certainty</li>
+                    <li>• Audio Sync: {data.audio_analysis.score}% anomaly</li>
                 </ul>
             </div>
             <div className="glass-panel p-8">
                 <h3 className="font-bold mb-4 flex items-center space-x-2">
                     <ExternalLink className="text-force-blue" />
-                    <span>Reference Clips</span>
+                    <span>Metadata Origin</span>
                 </h3>
-                <p className="text-sm text-white/50 mb-4 italic">Compare against original footage from government archives.</p>
-                <div className="aspect-video bg-white/5 rounded-lg border border-white/10 flex items-center justify-center">
-                    <span className="text-xs font-mono opacity-20">[Original Footage Sync]</span>
+                <p className="text-sm text-white/50 mb-4 italic">File Name: {data.visual_analysis.details.method || 'General Analysis'}</p>
+                <div className="aspect-video bg-white/5 rounded-lg border border-white/10 flex flex-col items-center justify-center space-y-2">
+                    <span className="text-xs font-mono opacity-20">[{data.ensemble_result.verdict} DETECTED]</span>
+                    <span className="text-[10px] text-white/30 uppercase">ID: {data.ensemble_result.id}</span>
                 </div>
             </div>
         </div>
     </motion.div>
 );
 
-const CourtView = () => (
+const CourtView = ({ data, onDownload }: any) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
         <div className="glass-panel p-8 grid md:grid-cols-3 gap-12">
             <div className="md:col-span-2">
-                <h3 className="text-2xl font-black mb-6">FORENSIC EVIDENCE LOG</h3>
+                <h3 className="text-2xl font-black mb-6 uppercase tracking-tighter">FORENSIC EVIDENCE LOG</h3>
                 <div className="space-y-4 font-mono text-xs">
                     {[
-                        { time: '00:01:23', event: 'rPPG Heart Rate Mismatch', confidence: '99.2%', signal: 'FAIL' },
-                        { time: '00:01:45', event: 'Metadata: Device Signature Missing', confidence: 'N/A', signal: 'WARN' },
-                        { time: '00:02:12', event: 'Spectral Anomaly in High Frequencies', confidence: '84.5%', signal: 'FAIL' },
-                        { time: '00:02:34', event: 'Face-to-Neck Boundary Artifacts', confidence: '91.0%', signal: 'FAIL' },
+                        { event: 'AI Neural Classifier', score: data.visual_analysis.score, status: data.visual_analysis.score > 50 ? 'FAIL' : 'PASS' },
+                        { event: 'Audio Spectral Check', score: data.audio_analysis.score, status: data.audio_analysis.score > 50 ? 'FAIL' : 'PASS' },
+                        { event: 'Biometric Heartbeat', score: data.biometric_analysis.score, status: data.biometric_analysis.score > 50 ? 'FAIL' : 'PASS' },
+                        { event: 'Metadata Integrity', score: data.metadata_analysis.score, status: data.metadata_analysis.score > 50 ? 'FAIL' : 'PASS' },
                     ].map((log, i) => (
                         <div key={i} className="flex justify-between p-3 bg-white/5 rounded border border-white/5">
-                            <span className="text-white/40">{log.time}</span>
+                            <span className="text-white/40">[{i+1}]</span>
                             <span className="text-white/80">{log.event}</span>
-                            <span className={log.signal === 'FAIL' ? 'text-force-red' : 'text-force-gold'}>{log.signal}</span>
+                            <span className="text-white/40">{Math.round(log.score)}%</span>
+                            <span className={log.status === 'FAIL' ? 'text-force-red' : 'text-force-green'}>{log.status}</span>
                         </div>
                     ))}
                 </div>
@@ -77,16 +85,16 @@ const CourtView = () => (
                         <div className="w-16 h-16 border-2 border-force-blue rounded-full mb-4 flex items-center justify-center">
                             <Shield className="text-force-blue" />
                         </div>
-                        <span className="text-[10px] text-white/40 text-center leading-tight">SHA-256 Hash Verified on Polygon Blockchain</span>
+                        <span className="text-[10px] text-white/40 text-center leading-tight">SHA-256 Hash Anchored on Polygon Blockchain</span>
                     </div>
                 </div>
-                <button className="btn-primary w-full py-2 text-xs">Generate Admissibility Doc</button>
+                <button onClick={onDownload} className="btn-primary w-full py-3 text-[10px] font-bold uppercase tracking-[0.2em] shadow-blue-glow">Generate Admissibility Doc</button>
             </div>
         </div>
     </motion.div>
 );
 
-const PlatformView = () => (
+const PlatformView = ({ data }: any) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <div className="glass-panel p-8">
             <div className="flex justify-between items-center mb-6">
@@ -94,74 +102,71 @@ const PlatformView = () => (
                     <Code className="text-force-green" />
                     <span>API Response Stream</span>
                 </h3>
-                <div className="text-[10px] font-mono text-white/30">v1.2 // real-time</div>
+                <div className="text-[10px] font-mono text-white/30">v1.2 // Production</div>
             </div>
             <div className="bg-force-black rounded-xl p-8 border border-white/5 font-mono text-sm overflow-x-auto">
                 <pre className="text-emerald-500">
-                    {`{
-  "request_id": "vf_49201948",
-  "analyzed_at": "2026-02-21T22:45:01Z",
-  "media_type": "video/mp4",
-  "verdict": {
-    "status": "FAKE",
-    "score": 0.942,
-    "confidence": "high"
-  },
-  "force_breakdown": {
-    "visual": 0.961,
-    "audio": 0.892,
-    "metadata": 0.654,
-    "biometric": 0.998
-  },
-  "blockchain_id": "0x4f...921",
-  "webhooks_triggered": true
-}`}
+                    {JSON.stringify({
+                        id: `VF-${data.ensemble_result.id}`,
+                        verdict: data.ensemble_result.verdict,
+                        confidence: data.ensemble_result.final_score / 100,
+                        forces: {
+                            visual: data.visual_analysis.score / 100,
+                            audio: data.audio_analysis.score / 100,
+                            biometric: data.biometric_analysis.score / 100,
+                            metadata: data.metadata_analysis.score / 100
+                        },
+                        reasons: data.ensemble_result.details.reasons || ["Analysis complete"]
+                    }, null, 2)}
                 </pre>
             </div>
             <div className="mt-8 grid md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                     <h4 className="text-xs font-bold uppercase mb-2">Endpoint Method</h4>
-                    <div className="text-force-blue font-mono">POST /api/v1/analyze</div>
+                    <div className="text-force-blue font-mono">POST /api/v1/analyze/dossier</div>
                 </div>
                 <div className="p-4 rounded-lg bg-white/5 border border-white/10">
                     <h4 className="text-xs font-bold uppercase mb-2">Auth Required</h4>
-                    <div className="text-force-gold font-mono">Bearer API_KEY</div>
+                    <div className="text-force-gold font-mono">Bearer AUTH_TOKEN</div>
                 </div>
             </div>
         </div>
     </motion.div>
 );
 
-const CitizenView = () => (
+const CitizenView = ({ data }: any) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <div className="flex flex-col items-center justify-center py-12">
             <div className="w-full max-w-sm glass-panel p-8 relative">
-                {/* Browser Extension Simulator */}
                 <div className="absolute -top-12 left-1/2 -translate-x-1/2">
-                    <div className="w-12 h-12 bg-force-blue rounded-xl flex items-center justify-center shadow-lg shadow-force-blue/20">
-                        <Shield className="text-black" />
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${data.ensemble_result.verdict === 'FAKE' ? 'bg-force-red text-white' : 'bg-force-blue text-black'}`}>
+                        <Shield />
                     </div>
                 </div>
                 <h3 className="text-xl font-bold text-center mt-4 mb-2">VeriForce Extension</h3>
-                <p className="text-sm text-center text-white/40 mb-8">Currently monitoring browser tab: YouTube</p>
+                <p className="text-sm text-center text-white/40 mb-8 lowercase tracking-widest">Active Protection</p>
 
-                <div className="p-4 rounded-lg bg-force-red/10 border border-force-red/20 mb-6">
+                <div className={`p-4 rounded-lg mb-6 border ${data.ensemble_result.verdict === 'FAKE' ? 'bg-force-red/10 border-force-red/20' : 'bg-force-green/10 border-force-green/20'}`}>
                     <div className="flex items-center space-x-3 mb-2">
-                        <AlertCircle size={16} className="text-force-red" />
-                        <span className="text-xs font-bold text-force-red uppercase">Fake Content Alert</span>
+                        {data.ensemble_result.verdict === 'FAKE' ? <AlertCircle size={16} className="text-force-red" /> : <Shield size={16} className="text-force-green" />}
+                        <span className={`text-xs font-bold uppercase ${data.ensemble_result.verdict === 'FAKE' ? 'text-force-red' : 'text-force-green'}`}>
+                            {data.ensemble_result.verdict === 'FAKE' ? 'Fake Content Alert' : 'Content Verified'}
+                        </span>
                     </div>
-                    <p className="text-xs text-white/60 leading-relaxed">
-                        This video has been flagged as synthetic. Viewer discretion is advised.
+                    <p className="text-xs text-white/60 leading-relaxed uppercase tracking-tighter">
+                        {data.ensemble_result.verdict === 'FAKE' 
+                            ? "This video has been flagged as synthetic. Viewer discretion is advised."
+                            : "No synthetic signatures detected. This content appears human-origin."}
                     </p>
                 </div>
 
                 <div className="space-y-3">
-                    <button className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold transition-colors">See Forensic Why</button>
-                    <button className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold transition-colors">Report to Election Commission</button>
+                    <button className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold transition-colors">Forensic Breakdown</button>
+                    <button className="w-full py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold transition-colors">Send to Council</button>
                 </div>
             </div>
-            <p className="mt-12 text-center text-white/40 text-sm max-w-xs">
-                The Browser Extension Simulator shows how VeriForce protects everyday citizens from misinformation.
+            <p className="mt-12 text-center text-white/40 text-sm max-w-xs uppercase tracking-widest font-mono text-[8px]">
+                Real-time browser defense active.
             </p>
         </div>
     </motion.div>
@@ -169,6 +174,51 @@ const CitizenView = () => (
 
 const Council = () => {
     const [activeTab, setActiveTab] = useState('journalist');
+    const [videoId, setVideoId] = useState<number | null>(null);
+    const [videoData, setVideoData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchLatestVideoData = async () => {
+        try {
+            // Fetch list of videos
+            const res = await api.get('videos/');
+            if (res.data && res.data.length > 0) {
+                // Get the latest one that is completed
+                const completed = res.data.filter((v: any) => v.status === 'COMPLETED').sort((a: any, b: any) => b.id - a.id);
+                if (completed.length > 0) {
+                    const latestId = completed[0].id;
+                    setVideoId(latestId);
+                    const resultsRes = await videoApi.results(latestId);
+                    setVideoData(resultsRes.data);
+                }
+            }
+        } catch (e) {
+            console.error('Failed to fetch data', e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDownloadDossier = async () => {
+        if (!videoId) return;
+        try {
+            const res = await videoApi.exportDossier(videoId);
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `veriforce_dossier_${videoId}.json`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            toast.success('Forensic Case File generated and downloaded.');
+        } catch (e) {
+            toast.error('Failed to generate export.');
+        }
+    };
+
+    useEffect(() => {
+        fetchLatestVideoData();
+    }, []);
 
     const tabs = [
         { id: 'journalist', name: 'Journalist', icon: FileText },
@@ -177,11 +227,34 @@ const Council = () => {
         { id: 'citizen', name: 'Citizen', icon: UserCheck },
     ];
 
+    if (isLoading) return (
+        <div className="flex h-[80vh] items-center justify-center">
+            <div className="flex flex-col items-center space-y-4">
+                <Loader2 className="animate-spin text-force-blue" size={48} />
+                <span className="text-xs font-mono tracking-[0.4em] uppercase opacity-40">Consulting the Council...</span>
+            </div>
+        </div>
+    );
+
+    if (!videoData) return (
+        <div className="flex h-[80vh] items-center justify-center p-12 text-center">
+            <div className="glass-panel p-12 max-w-lg cursor-pointer" onClick={() => window.location.href = '/detector'}>
+                <AlertCircle className="text-force-blue mx-auto mb-6" size={48} />
+                <h3 className="text-2xl font-black mb-4 uppercase">No Cases Available</h3>
+                <p className="text-white/40 mb-8">You must analyze a video in the Detector before the Council can pass judgment.</p>
+                <button className="btn-primary py-2 px-8">Go to Detector</button>
+            </div>
+        </div>
+    );
+
     return (
         <div className="container mx-auto px-6 py-12">
             <div className="flex flex-col items-center mb-16">
                 <h1 className="text-4xl md:text-5xl font-display font-black mb-4">THE JEDI COUNCIL</h1>
-                <p className="text-white/50">Four specialized perspectives on the same truth.</p>
+                <p className="text-white/50 lowercase tracking-widest font-mono text-xs">Four perspectives on the same verdict.</p>
+                <div className="mt-4 px-4 py-1 rounded-full border border-white/5 bg-white/[0.02] text-[10px] font-mono opacity-40">
+                    CASE ID: VF-{videoId} // SOURCE: {videoData.visual_analysis.details.method || 'ENSEMBLE'}
+                </div>
             </div>
 
             <div className="flex flex-wrap justify-center gap-4 mb-16">
@@ -199,10 +272,10 @@ const Council = () => {
 
             <div className="min-h-[500px]">
                 <AnimatePresence mode="wait">
-                    {activeTab === 'journalist' && <JournalistView key="journalist" />}
-                    {activeTab === 'court' && <CourtView key="court" />}
-                    {activeTab === 'platform' && <PlatformView key="platform" />}
-                    {activeTab === 'citizen' && <CitizenView key="citizen" />}
+                    {activeTab === 'journalist' && <JournalistView key="journalist" data={videoData} onDownload={handleDownloadDossier} />}
+                    {activeTab === 'court' && <CourtView key="court" data={videoData} onDownload={handleDownloadDossier} />}
+                    {activeTab === 'platform' && <PlatformView key="platform" data={videoData} />}
+                    {activeTab === 'citizen' && <CitizenView key="citizen" data={videoData} />}
                 </AnimatePresence>
             </div>
         </div>

@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     VisualAnalysisDetail, AudioAnalysisDetail,
     MetadataAnalysisDetail, BiometricAnalysisDetail,
-    EnsembleResultDetail, ForensicReportView, CombinedResultsView
+    EnsembleResultDetail, ForensicReportView, CombinedResultsView,
+    ExportCaseFileView
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('<int:video_id>/biometric/', BiometricAnalysisDetail.as_view()),
     path('<int:video_id>/ensemble/', EnsembleResultDetail.as_view()),
     path('<int:video_id>/report/', ForensicReportView.as_view()),
+    path('<int:video_id>/export/', ExportCaseFileView.as_view(), name='export-dossier'),
 ]

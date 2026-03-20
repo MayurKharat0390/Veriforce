@@ -90,3 +90,46 @@ class CombinedResultsView(APIView):
             })
         except Exception as e:
             return Response({"error": str(e)}, status=404)
+
+
+from django.http import HttpResponse
+import json
+
+class ExportCaseFileView(APIView):
+    """
+    Exports a full forensic dossier as a JSON file.
+    This creates a functional "Download" for the Jedi Council view.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request, video_id):
+        from videos.models import Video
+        try:
+            video = Video.objects.get(id=video_id)
+            ensemble = video.ensemble_result
+            
+            data = {
+                "dossier_id": f"VF-{video.id}-{ensemble.id}",
+                "timestamp": ensemble.timestamp.isoformat(),
+                "video_title": video.title,
+                "final_verdict": ensemble.verdict,
+                "confidence_score": ensemble.final_score,
+                "forces_breakdown": {
+                    "visual": VisualAnalysisSerializer(video.visual_analysis).data,
+                    "audio": AudioAnalysisSerializer(video.audio_analysis).data,
+                    "metadata": MetadataAnalysisSerializer(video.metadata_analysis).data,
+                    "biometric": BiometricAnalysisSerializer(video.biometric_analysis).data,
+                },
+                "explainability_summary": ensemble.details.get('reasons', []),
+                "blockchain_proof": {
+                    "transaction_hash": video.blockchain_record.transaction_id if hasattr(video, 'blockchain_record') else "Unanchored",
+                    "network": "Polygon Amoy"
+                }
+            }
+            
+            response = HttpResponse(json.dumps(data, indent=4), content_type="application/json")
+            response['Content-Disposition'] = f'attachment; filename="veriforce_dossier_{video_id}.json"'
+            return response
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=404)

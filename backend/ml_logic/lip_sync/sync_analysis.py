@@ -127,10 +127,11 @@ class LipSyncForce:
                 break
 
             if frame_count % sample_rate == 0:
-                small = cv2.resize(frame, (320, 240))
-                gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                gray = cv2.equalizeHist(gray)
 
-                faces = self.face_cascade.detectMultiScale(gray, 1.1, 5, minSize=(40, 40))
+                # More sensitive detection
+                faces = self.face_cascade.detectMultiScale(gray, 1.05, 3, minSize=(80, 80))
 
                 if len(faces) > 0:
                     # Take biggest face

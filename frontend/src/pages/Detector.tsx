@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileVideo, Shield, AlertTriangle, CheckCircle, Zap, Database, Globe, Activity, Search, Play, Loader2, X } from 'lucide-react';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 import api, { videoApi } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -119,6 +120,42 @@ const ForceReportModal = ({ isOpen, onClose, report }: any) => (
                                     <li>• Signal SNR: {report.forces?.biometric?.blood_flow_data?.snr?.toFixed(2) || '0.00'}</li>
                                     <li>• Pulse Lock: {report.forces?.biometric?.pulse_detected ? 'SECURED' : 'LOST'}</li>
                                 </ul>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-force-gold mb-4">Biometric Time-Series Analysis</h3>
+                            <div className="glass-panel h-64 w-full p-4 bg-black/40 border-force-gold/5">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={(report.forces?.biometric?.details?.ui_signals || []).map((v: number, i: number) => ({ time: i, value: v }))}>
+                                        <defs>
+                                            <linearGradient id="colorPulse" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3}/>
+                                                <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <XAxis dataKey="time" hide />
+                                        <YAxis hide domain={['auto', 'auto']} />
+                                        <Tooltip 
+                                            contentStyle={{ backgroundColor: '#000', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px' }}
+                                            itemStyle={{ color: '#D4AF37' }}
+                                        />
+                                        <Area 
+                                            type="monotone" 
+                                            dataKey="value" 
+                                            stroke="#D4AF37" 
+                                            fillOpacity={1} 
+                                            fill="url(#colorPulse)" 
+                                            strokeWidth={2}
+                                            isAnimationActive={true}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="flex justify-between text-[10px] font-mono text-white/20 uppercase">
+                                <span>Signal Acquisition: Stable</span>
+                                <span>Frame Sampling: 25Hz</span>
+                                <span>Method: rPPG (Remote Photoplethysmography)</span>
                             </div>
                         </div>
 

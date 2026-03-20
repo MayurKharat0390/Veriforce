@@ -61,10 +61,12 @@ class AudioForce:
                 score += 45.0
 
             # Pitch: Robotic monotone TTS/voice clone = very low variance
-            if 0 < pitch_var < 300:
-                score += 35.0
-            elif pitch_var > 20000:
-                score += 20.0  # Impossible jumps = artifact
+            # Only apply if we actually detected speech (voiced_ratio > 0.3)
+            if voiced_ratio > 0.3:
+                if 0 < pitch_var < 300:
+                    score += 35.0
+                elif pitch_var > 20000:
+                    score += 20.0  # Impossible jumps = artifact
 
             # ZCR: AI speech tends to have abnormally high ZCR
             if avg_zcr > 0.15:
