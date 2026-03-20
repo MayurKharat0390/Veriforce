@@ -1,9 +1,7 @@
 <div align="center">
-  <img src="https://via.placeholder.com/800x200/0f172a/38bdf8?text=VeriForce:+The+Jedi+Mind+Trick+Detector" alt="VeriForce Banner">
+  <img src="docs/banner.png" alt="VeriForce Banner">
 
   # 🛡️ VeriForce
-  
-  **Winner's Choice for Bluebit Hackathon 4.0**
   
   *Protecting democracy and human connection in the age of synthetic media through multi-modal deepfake detection.*
 
@@ -20,11 +18,10 @@
 <br />
 
 ## 📸 Platform Glimpse
-> **Note to Judges**: Since VeriForce runs large AI models natively (`PyTorch`, `Transformers`), the platform is best experienced locally. Below are snapshots of the interface.
 
 | **Jedi Council Dashboard** | **Biometric Pulse Detection** |
 | :---: | :---: |
-| <img src="https://via.placeholder.com/400x250/1e293b/94a3b8?text=Dashboard+Screenshot" alt="Dashboard"> | <img src="https://via.placeholder.com/400x250/1e293b/94a3b8?text=Pulse+Detection+Screenshot" alt="Detector"> |
+| <img src="docs/dashboard.png" alt="Dashboard Screenshot" width="400"> | <img src="docs/pulse.png" alt="Pulse Detection Screenshot" width="400"> |
 
 ---
 
